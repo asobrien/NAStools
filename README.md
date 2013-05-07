@@ -1,7 +1,9 @@
-# NASPY -- NASA Data File Tools #
+# NAStools #
+
+A python module for working with file formats commonly encountered in the field of observational/airborne atmospheric sciences. The project is still in its infancy but (limited) functionality is currently present in the module.
 
 
-## What is/are Naspy & nastools? ##
+## What is Nastools? ##
 
 Nastools provides a python package for dealing with common NASA file formats commonly encountered in the atmospheric science and instrumentation community.
 
