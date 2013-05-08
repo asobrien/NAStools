@@ -4,7 +4,7 @@ setup(name='NAStools',
       description='NASA Data Format Tools',
       author="Anthony O'Brien",
       author_email='anthonyo@princeton.edu',
-      url='github url',
+      url='https://github.com/asobrien/NAStools',
       # packages=['distutils', 'distutils.command'],
       packages = ['nastools'],
       package_dir = {'nastools': 'src/nastools'},
@@ -34,10 +34,11 @@ setup(name='NAStools',
       
       nastools works with:
       
-        - `NASA Ames Format for Data Exchange <http://badc.nerc.ac.uk/help/formats/NASA-Ames/>`_
         - `ICARRT Data Format <http://www-air.larc.nasa.gov/missions/etc/IcarttDataFormat.htm>`_
+        - `NASA Ames Format for Data Exchange (in development) <http://badc.nerc.ac.uk/help/formats/NASA-Ames/>`_
+
         
-      See the project `homepage <http://github.com>`_ for more information.
+      See the project `homepage <https://github.com/asobrien/NAStools>`_ for more information.
       
       """
      )
