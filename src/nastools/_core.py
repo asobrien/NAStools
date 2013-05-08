@@ -171,8 +171,7 @@ class Naspy(object):
       
         # TODO: [QUICK FIX] implement get_filetype tuple, instead of doing it again
         # Compressed file?
-        ext = Fifo(self._fileAbsPath_).get_filetype()[1]
-        print ext
+        ext = Fifo(self).get_filetype()[1]
         if ext not in ['gzip', 'bz2']:
             ext = None
         
