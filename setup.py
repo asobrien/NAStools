@@ -16,7 +16,8 @@ setup(name='NAStools',
                   'datetime',
                   'bz2',
                   'warnings',
-                  'struct'
+                  'struct',
+                  're'
                   ],
       classifiers = ["Development Status :: 3 - Alpha",
                      "Environment :: Console",
