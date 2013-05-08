@@ -19,13 +19,16 @@ Note that only FFI = 1001 type-files are supported at this point.
 
 ## Quick Start Guide ##
 
-The following should get you up and running quickly:
+The following should get you up and running quickly.
+
+Issues/bugs/feature requests/etc can be [reported here](https://github.com/asobrien/NAStools/issues).
+
 
 ### Installation ###
 
 Nastools are available from the cheeseshop:
 
-    command for pip installation instructions here
+    sudo pip install NAStools
     
 Any other ways to install go here.
 
