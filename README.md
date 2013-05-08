@@ -94,7 +94,10 @@ Generating a Naspy object is enough to start doing analysis.
     # rename 'DATETIME' field to 'DT'
     df = df.rename(columns={'DATETIME':'DT'})
     
-    
+
+## VERSION HISTORY ##
+
+* **0.1.0**: Initial release.
     
 
 
