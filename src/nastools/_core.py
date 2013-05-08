@@ -1,97 +1,71 @@
-# NAS Tool
+# _core.py
+# NAStools core utilities for reading ICARRT and NASA Ames files
 
-# we need to clean up ict module, but the core functionality is there
 
-# required modules
-# Module to process ICARTT data
+
+##### MODULES ###
 import numpy as np
-import gzip
-import os
-import datetime
 import pandas
-import bz2
-import warnings
-# import copy
-import numpy.lib.recfunctions as rfn  # need array append function
-import struct
+import datetime
+import gzip, bz2
+import os, re, struct, warnings
 
-class Fifo(object):
-    """File input / File output handler class."""
-    def __init__(self, filename):
-        self.filename = filename
-        # self.filetype_warnings() # issue any warnings
-        return None
+
+
+##### CLASS DEFINITIONS #####      
         
-    def get_filetype(self):
-        """Returns a string of filetype.
+class Naspy(object): 
+    """Naspy class to generate naspy objects containing header and filetype information.
+    
+    """ 
+    def __init__(self, fname, data_format='auto'):
+        """Generates a Naspy object.
         
+        This function is the entry point to working with ICARRT or NASA Ames files. An 
+        object is created which contains header information and internal data specifying 
+        information about the file.
+        
+        PARAMETERS
+        ----------
+        fname : str
+            Absolute or relative path to input file. File may be uncompressed or 
+            compressed (bz2 or gzip); gzipped files are not fully supported by numpy.
+        data_format : {'auto', 'ict', 'nas'}, default 'auto'
+            Specifies file format of input file; default behavior is for nastools to 
+            determine this automatically, however this can be manually over-ridden by 
+            specifying either 'ict' or 'nas' explicitly.
+            
         RETURNS
         -------
-        ext : string
-            File-extension of Naspy object. Note that 'gz' are returned as 'gzip'.
-            
-        """
-        fname = self.filename
-        ext = os.path.splitext(fname)[-1].lower().lstrip('.') # force lower case
-        if ext == 'gz':
-            ext = 'gzip'
-        return ext
-            
-    def open_file(self):
-        """Generates fileObj based on extension.
+        naspy : object
+            A naspy object containing information about the file and methods to generate 
+            numpy.arrays or pandas.DataFrames.
         
-        This creates an open fileObj, it is up to you to close it when done with it.
-        """
-        fname = self.filename
+        EXAMPLES
+        --------
+        # Generate a header object
+        import nastools as nt
+        naspy = nt.Naspy(fname)
         
-        ext = os.path.splitext(fname)[-1].lower() # force lower case
-        # this is returning text file! or not working
-        if ext in ['.gz','.gzip']:
-            f = gzip.GzipFile(filename=fname, mode='rb')
-        elif ext in ('.bz2'):
-            f = bz2.BZ2File(fname, 'rU')
-        else:
-            f = open(fname, 'rU')
-        return f
-        
-    def filetype_warnings(self):
-        # Need to issue warning re .gz file type
-        warningMessage = "Gzipped filetypes are not fully supported.\nHeader information is available through the header instance, however generating numpy arrays from gzipped is not currently possible. Generating pandas.DataFrames IS SUPPORTED."
-        
-        fname = self.filename
-        ext = os.path.splitext(fname)[-1].lower() # force lower case
-        if ext in ['.gz','.gzip']:
-            warnings.warn(warningMessage)
-        else:
-            return None
+        # Get PI(s)
+        print naspy.header.PI
 
-    def gzipFileSize(self):
-        """return UNCOMPRESSED filesize of a gzipped file.
-        
-        source: http://code.activestate.com/lists/python-list/245777/
         """
-        fo = open(self.filename, 'rb')
-        fo.seek(-4, 2)
-        r = fo.read()
-        fo.close()
-        return struct.unpack('<I', r)[0]
+        if data_format not in ['auto', 'ict', 'nas']:
+            raise AttributeError("data_format='%s' is unknown; "
+                                 "must be 'auto', 'ict' or 'nas'" % data_format)
         
-        
-class Naspy(object):
-    "Initializes a Naspy object"
-    def __init__(self, fname):
+        self._data_format = data_format
         self._fileAbsPath_ = os.path.abspath(fname) # full path to file
-        self._file = Fifo(self._fileAbsPath_) # File object instance
-        self.header = Header(self) # This needs to be passed into Header, so we can 
-                                   # derive attrs
+        self._file = Fifo(self) # File object instance
+        self.header = Header(self) # self passed into Header, to derive attrs
         self.time = Time(self)  # Get time functionality
-        # Issue gzip warning:
-        Fifo(self._fileAbsPath_).filetype_warnings()
+        Fifo(self).filetype_warnings() # Issue gzip warning
         
         return None
         
     def make_numpy(self, masked=False, missing_values='auto'):
-        """Generates a numpy ndarray.
+        """Generates a numpy.ndarray.
         
         PARAMETERS
         ----------
@@ -105,6 +79,18 @@ class Naspy(object):
             the header. Note that the missing data flags for the dependent variables 
             (e.g. -99999) do not need to be specified.
             
+        RETURNS
+        -------
+        arr : numpy.ndarray
+        
+        EXAMPLES
+        --------
+        # Generate a numpy.ndarray representing data in file
+        arr = naspy.make_numpy()
+        
+        # Generate a masked array with missing values as np.nan
+        arr = naspy.make_numpy(masked=True)
+        
         """
         # Get variable names
         names = [ self.header.INDEPENDENT_VARIABLE['NAME'] ]
@@ -129,36 +115,14 @@ class Naspy(object):
                     case_sensitive = False,
                     unpack=True
                     )
-        
+        # TODO: Future feature, numpy array with datetime64 support
         # KNOWN DEFECT: can't append datetime64 to an existing array using:
         #   numpy.lib.recfunctions.append_fields
         #  fixed in Numpy 1.7.0 
         #  (see: http://projects.scipy.org/numpy/ticket/1912)
         #  (github: https://github.com/numpy/numpy/issues/2505)
         
-        # Datetime fields are mangled in numpy 1.6 using the following methods
-        # I think this is fixed in NP 1.7, so let's hold off until we use that
-        #  see (http://bit.ly/12HjWG6) for information on behavioral differences between
-        #   versions 1.6 and 1.7
-        
-        # Quick fix, add new field, then convert
-            #  DT = (arr[arr.dtype.names[0]])
-            #  arr = rfn.append_fields(arr, names='DATETIME', data=DT, usemask=False)
-            #  
-            #  if datetime: # generate a datetime object column
-            #      arr['DATETIME'] = (
-            #          np.timedelta64(arr['DATETIME']*1E6) + 
-            #          np.datetime64(self.header.START_UTC.isoformat())).astype('datetime64')
-            #      # Need to operate on primary variable
-            #      # This get our time:
-            #      # np.timedelta64(foo*1E6)+np.datetime64(GG.header.START_UTC.isoformat())s
-            #  # arr = np.append(arr, DT)
-            #  appArr = numpy.lib.recfunctions.append_fields(arr,
-            #     names ='DATETIME', data=DT, 
-            #     usemask=False, asrecarray=False)
-        
         return arr
-    
     
     def make_DataFrame(self, case_sensitive='upper', convert_missing=True, 
                         make_datetime=True, datetime_asindex=True, drop_datetime=True,
@@ -173,9 +137,16 @@ class Naspy(object):
             will be returned in upper case; 'as-is' or True returns variables in the case 
             as they are specified in the file.
         convert_missing : bool, default True
+            Option to convert specified missing values to np.nan
         make_datetime : bool, default True
+            Option to generate a datetime column
         datetime_asindex : bool, default True
+            Option to reindex DataFrame by datatime column; note that make_datetime must 
+            be True for this option to be meaningful.
         drop_datetime: bool, default True
+            Whether or not to remove the datetime column from the DataFrame; note that 
+            both make_datetime and datetime_asindex must be True for this option to to be 
+            meaningful.
         missing_values : 'auto' or list, default 'auto'
             A list of strings specifying additional field names in the header file 
             (e.g. 'LLOD_FLAG') which indicate missing values. The default behavior is 
@@ -186,16 +157,21 @@ class Naspy(object):
             For on-the-fly decompression of on-disk data; 'auto' will try and detect 
             filetype based on extension. Use other options to manually override 'auto'.
         
+        RETURNS
+        -------
+        df : pandas.DataFrame
+            A pandas.DataFrame containing data from the naspy object
+        
+        EXAMPLES
+        --------
+        # Generate a DataFrame object
+        df = naspy.make_DataFrame()
         
         """
-        # END EXAMPLES:
-        # Rename datetime to dt:
-        # df = df.rename_axis({'DATETIME':'DT'})
-        
-        # what are the index options
-        
+      
+        # TODO: [QUICK FIX] implement get_filetype tuple, instead of doing it again
         # Compressed file?
-        ext = Fifo(self._fileAbsPath_).get_filetype()
+        ext = Fifo(self._fileAbsPath_).get_filetype()[1]
         print ext
         if ext not in ['gzip', 'bz2']:
             ext = None
@@ -211,14 +187,6 @@ class Naspy(object):
         
         if convert_missing:
              df = self.dataframe_nans(df, missing_values)
-         
-         # make datetime object
-        # dt = []
-#         for utcSecs in df[df.columns[0]].values:
-#              dt.append(datetime.timedelta(0, int(utcSecs))+self.header.START_UTC)
-#         df['foo'] = pandas.Series(dt)
-         
-        # Can we do the same thing with numpy methods, yes and it's prob faster
         
         if make_datetime:
             DATETIME = 'DATETIME'
@@ -227,15 +195,7 @@ class Naspy(object):
             if datetime_asindex:
                 df = df.set_index(DATETIME, drop=drop_datetime)
         
-        # reindex into DATETIME
-        # df = df.reindex(index=df['DATETIME'])
-        
-         # First make a numpy array, not masked!
-         # arr = self.make_numpy()
-#          df = pandas.DataFrame(data=array)
-        
         return df
-    
     
     def get_column_names(self, case_sensitive='upper'):
         """Returns a list of column names from a Naspy object.
@@ -277,10 +237,7 @@ class Naspy(object):
         
         for key, val in missingVals.iteritems():
             df[df.columns[key]] = df[df.columns[key]].replace(val, np.nan)
-            
-        # need to replace each column missing values, using missingVal dict
-        # MAKE SURE COLUMN IS A FLOAT IF WE WANT TO INSERT NANS
-        #  how do we do this... nans are not supported for int currentls.. so?
+        
         return df
     
     def missing_values(self, flags=['LLOD_FLAG', 'ULOD_FLAG']):
@@ -295,6 +252,7 @@ class Naspy(object):
         
         key : string
             'int' or 'names'; 'int' returns integer key and 'names' returns column names.
+        
         """
         # Make sure attributes exist
         otherFlags = []
@@ -304,9 +262,6 @@ class Naspy(object):
                 otherFlags.append(str(getattr(self.header, flag)))
             except AttributeError:
                 pass # Attribute doesn't exist
-        
-        # get column names
-        # names = self.get_column_names()
         
         # Column specific missing values
         missingVals = {} # Time column is never missing!
@@ -326,35 +281,43 @@ class Naspy(object):
         return missingVals
     
     def __repr__(self):
-        return "NASA Ames Data File (FFI = %i)\n%s" % (self.header.FFI,
-            self.header.FILENAME)
+        return ("%s Data File (FFI = %i)\n%s" % 
+                (self._file.data_format.upper(),
+                 self.header.FFI,
+                 self.header.FILENAME) )
+
+
 
 class Header(object):
     "Generates header information for a Naspy object, requires Naspy object."
     def __init__(self, Naspy):
         
         fname = Naspy._fileAbsPath_
-        # fname = parent._fileAbsPath_
-#         ext = os.path.splitext(fname)[1]
-#         if ext.lower() in ('.gz'):
-#             f = gzip.open(fname)
-#         else:
-#             f = open(fname, 'rU')
         self._fileObj_ = Naspy._file.open_file() # Attach fileObject
         self._fileAbsPath_ = os.path.abspath(fname) # full path to file
         self.FILENAME = os.path.split(fname)[1]
-        self._parse_header_() # parse the header
-        self._parse_normal_comments_() # additional comments
-        self._fileObj_.close()  # Make sure the file is when done
-        # self.fname = fname
-        # self.time = time(fname) # initialize; but I need to inherit!
+        self.parse_header(Naspy) # parse the header
+        # self._parse_normal_comments_() # additional comments
+        self._fileObj_.close()  # Make sure the file is closed when done
+        return None
+        
+    # Entry point to header parser
+    def parse_header(self, Naspy):
+        if Naspy._file.data_format == 'ict':
+            self.parse_header_ict()
+            self._parse_normal_comments_()
+        if Naspy._file.data_format == 'nas':
+            raise AttributeError("NASA Ames file format is not currently supported")
+        
         return None
         
     
-    def _parse_header_(self):
+    # TODO: create similar to parse NAS header; there are a few subtle differences between the NAS and ICT, so a seperate nas function is best
+    def parse_header_ict(self):
+        """Parses an ICT header and returns a naspy.header object. """
+        # get the filetype and specify the seperator
+        
         f = self._fileObj_
-        # f.seek(0) # Ensure at start of file
-
         self.HEADER_LINES, self.FFI = map(int, f.readline().split(','))
         self.PI = f.readline().strip()
         self.ORGANIZATION = f.readline().strip()
@@ -418,7 +381,8 @@ class Header(object):
                 setattr(self, comment[0].upper().strip(), comment[1].strip())
         return None
     
-    ### FUNCTIONS TO WORK Naspy object
+    ### ADDITIONAL HEADER FUNCTIONS
+    # TODO: build up header funtions 
     
     def contact_info(self):
         print """
@@ -437,26 +401,22 @@ class Header(object):
         return None
 
     def data_description(self):
-        fileStart = self.START_UTC
+        pass
             
 
+
 class Time(object):  # I don't know how to inherit properly here!
-    """All time based functions reside here."""
-    def __init__(self, parent):
-        self._fname = parent._fileAbsPath_
-        self._START_UTC = parent.header.START_UTC
-        self._HEADER_LINES = parent.header.HEADER_LINES
+    """Class for time based methods."""
+    def __init__(self, Naspy):
+        self._fname = Naspy._fileAbsPath_
+        self._START_UTC = Naspy.header.START_UTC
+        self._HEADER_LINES = Naspy.header.HEADER_LINES
         
         return None
      
     def start_time(self):
         """Returns a datetime object of first datapoint."""
         startDate = self._START_UTC
-        # Read the first timestamp
-        # f = open(self._fname)
-#         lines = []
-#         for i in range(self._HEADER_LINES):
-#             lines.append(f.readline())
         f = Fifo(self._fname).open_file()
         firstDataLine = f.readline()
         startOffset = datetime.timedelta(0, int(firstDataLine.split(',')[0]))
@@ -464,22 +424,15 @@ class Time(object):  # I don't know how to inherit properly here!
         f.close()
         return startTime
     
-    # How to read last line in file?
     """Returns datetime object of last datapoint."""    
     def end_time(self):
         startDate = self._START_UTC
-        # f = open(self._fname)
-#         lines = []
-#         for i in range(self._HEADER_LINES):
-#             lines.append(f.readline())
-        
-        # seek from end not supported for gzip need to fix!
-        # what about bz2
+
         f = Fifo(self._fname).open_file()
         firstDataLine = f.readline()
         
-        # Can't read backwards in a gzip file, so:
-        if Fifo(self._fname).get_filetype() == 'gzip':
+        # Can't read backwards in a gzip file, so jury-rig it:
+        if Fifo(self._fname).get_filetype()[1] == 'gzip':
             fsize = Fifo(self._fname).gzipFileSize()
             f.seek((fsize-fsize/20))
         else:
@@ -489,10 +442,124 @@ class Time(object):  # I don't know how to inherit properly here!
         endTime = startDate + endOffset
         f.close()
         return endTime
+
+
+        
+class Fifo(object):
+    """File input / File output handler class."""
+    def __init__(self, Naspy):
+        
+        # may be redundant
+        self.fileAbsPath = Naspy._fileAbsPath_
+        self._userDefined_data_format = Naspy._data_format 
+        self.filename = os.path.split(self.fileAbsPath)[1]
+        # Bind file info to Naspy object
+        comp, ext, dt = self.get_filetype()
+        self.is_compressed = comp
+        self.ext = ext
+        self.data_format = dt
+        return None
+    
+    # TODO: Redunant function, this functionality resides in get_filetype
+    def is_compressed(self):
+        """Determines whether the input file is compressed, returns a boolean object."""
+        fname = self.fileAbsPath
+        ext = os.path.splitext(fname)[-1].lower().lstrip('.')
+        if ext in ['gzip', 'gz', 'bz2']:
+            return True
+        return False
+        
+    def get_filetype(self):
+        """Returns a tuple (is_compressed, ext, data_format) {bool, 'str', 'str'} 
+        indicating if the file is compressed, the file extension, and the data file type.
+        
+        RETURNS
+        -------
+        fileType : tuple, {is_compressed, ext, data_format}
+            Filetype information of Naspy object:
+            is_compressed : bool; compressed filetype
+            ext : str; final extension of the file
+            data_format : str; data file format type, regardless of compression
+            
+        """
+        fname = self.fileAbsPath
+        ext = os.path.splitext(fname)[-1].lower().lstrip('.') # force lower case
+        if ext in ['gzip', 'gz', 'bz2']:
+            is_compressed = True
+        else:
+            is_compressed = False
+        
+        # Always refer to 'gz' as 'gzip'
+        if ext == 'gz':
+            ext = 'gzip'
+        
+        # NOW the hard part, whether file is icarrt or nas
+        # data_format = os.path.splitext(fname)[-2].lower().lstrip('.')
+        # if self._userDefined_data_format == 'auto': 
+        if self._userDefined_data_format == 'auto':
+            # we actually need to check out what's going on in the file
+            # open first line and parse first line, that will tell us
+            f = self.open_file()
+            line = f.readline().strip()
+            f.close()
+            
+            if bool(re.search('(\d+),(\s)(\d+)*', line)):
+                data_format = 'ict'
+            elif bool(re.search('(\d+)(\s)(\d+)*', line)):
+                data_format = 'nas'
+            else:
+                data_format = None
+        else:
+            data_format = self._userDefined_data_format 
+            
+        return (is_compressed, ext, data_format)
+            
+    def open_file(self):
+        """Generates fileObj based on extension.
+        
+        This creates an open fileObj, it is up to you to close it when done with it. 
+        Opens plain-text, gzipped, and bz2 files and returns a fileObject where standard
+        file functionality is present (e.g. `f.readline()`)
+        """
+        fname = self.fileAbsPath
+        
+        ext = os.path.splitext(fname)[-1].lower() # force lower case
+        # this is returning text file! or not working
+        if ext in ['.gz','.gzip']:
+            f = gzip.GzipFile(filename=fname, mode='rb')
+        elif ext in ('.bz2'):
+            f = bz2.BZ2File(fname, 'rU')
+        else:
+            f = open(fname, 'rU')
+        return f
+        
+    def filetype_warnings(self):
+        # Need to issue warning re .gz file type
+        warningMessage = (
+          "Gzipped filetypes are not fully supported.\nHeader information is available " 
+          "through the header instance, however generating numpy arrays from gzipped is "           "not currently possible. Generating pandas.DataFrames IS SUPPORTED." )
+        
+        fname = self.fileAbsPath
+        ext = os.path.splitext(fname)[-1].lower() # force lower case
+        if ext in ['.gz','.gzip']:
+            warnings.warn(warningMessage)
+        else:
+            return None
+
+    def gzipFileSize(self):
+        """return UNCOMPRESSED filesize of a gzipped file.
+        
+        source: http://code.activestate.com/lists/python-list/245777/
+        """
+        fo = open(self.fileAbsPath, 'rb')
+        fo.seek(-4, 2)
+        r = fo.read()
+        fo.close()
+        return struct.unpack('<I', r)[0]
         
 
-#
+##### END OF CLASSES       
 
-# EOF
+
           
     
