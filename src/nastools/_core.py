@@ -7,8 +7,12 @@
 import numpy as np
 import pandas
 import datetime
-import gzip, bz2
-import os, re, struct, warnings
+import gzip
+import bz2
+import os
+import re
+import struct
+import warnings
 
 
 
