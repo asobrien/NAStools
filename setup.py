@@ -8,16 +8,8 @@ setup(name='NAStools',
       # packages=['distutils', 'distutils.command'],
       packages = ['nastools'],
       package_dir = {'nastools': 'src/nastools'},
-
       requires = ['numpy (>=1.6.1)', 
-                  'pandas (>=0.10.1)', 
-                  'gzip',
-                  'os',
-                  'datetime',
-                  'bz2',
-                  'warnings',
-                  'struct',
-                  're'
+                  'pandas (>=0.10.1)'
                   ],
       classifiers = ["Development Status :: 3 - Alpha",
                      "Environment :: Console",
