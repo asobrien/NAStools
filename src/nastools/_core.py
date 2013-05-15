@@ -72,7 +72,8 @@ class Naspy(object):
         Fifo(self).filetype_warnings() # Issue gzip warning
         
         return None
-        
+    
+    # TODO: add var_names option to make_numpy    
     def make_numpy(self, masked=False, missing_values='auto'):
         """Generates a numpy.ndarray.
         
@@ -133,13 +134,18 @@ class Naspy(object):
         
         return arr
     
-    def make_DataFrame(self, case_sensitive='upper', convert_missing=True, 
-                        make_datetime=True, datetime_asindex=True, drop_datetime=True,
-                        missing_values='auto'):
+    def make_DataFrame(self, var_names='columns', case_sensitive='upper', 
+                       convert_missing=True, make_datetime=True, datetime_asindex=True,                          drop_datetime=True, missing_values='auto'):
         """Generates a pandas.DataFrame from a Naspy object.
         
         PARAMETERS
         ----------
+        var_names : list or {'columns' or 'header'}, default 'columns'
+            Specifies how to determine variable names used in the DataFrame; default                  behavior is to extract column names from the last line in the header. This is 
+            specified in ICARTT files but not always in NAS files. If this fails column 
+            names will be determined from variable descriptions in the header; this can 
+            be also be done by specifying 'header'. Alternately, a list of strings 
+            specifying variable names can be passed. Note that the case_sensitive options             are applied to this list.
         case_sensitive : string or bool, default 'upper'
             Formatting option of columns names; choices are 'upper' (default), 'lower', or
             'as-is' in addition to True or False. With no format specified, column names 
@@ -188,7 +194,7 @@ class Naspy(object):
         data_format = Fifo(self).get_filetype()[2]
         if data_format == 'ict':
             delimiter = ','
-        if data_format == 'nas':
+        elif data_format == 'nas':
             delimiter = r'\s*'
         else:
             raise AttributeError("unknown data format!")
@@ -197,7 +203,7 @@ class Naspy(object):
                  self._fileAbsPath_, 
                  skiprows = self.header.HEADER_LINES, 
                  delimiter = delimiter, 
-                 names = self.get_column_names(case_sensitive),
+                 names = self.get_column_names(var_names, case_sensitive),
                  dtype = np.float64, # Allow for nans
                  compression = ext
                  )
@@ -214,11 +220,18 @@ class Naspy(object):
         
         return df
     
-    def get_column_names(self, case_sensitive='upper'):
+    def get_column_names(self, var_names='columns', case_sensitive='upper'):
         """Returns a list of column names from a Naspy object.
         
         PARAMETERS
         ----------
+        var_names : list or {'columns' or 'header'}, default 'columns'
+            Specifies how variable names are derived; either from variable descriptions 
+            in the header (`header`) or from the last line of the header (`columns`); the 
+            default behavior is to get variable names from the columns with a fallback to 
+            header descriptions. Alternately the variable names can be manually passed  
+            with a list of strings. Note that case_sensitive options are still applied to 
+            this list.
         case_sensitive : string or bool, default 'upper'
             Formatting option of columns names; choices are 'upper' (default), 'lower', or
             'as-is' in addition to True or False. With no format specified, column names 
@@ -226,9 +239,22 @@ class Naspy(object):
             as they are specified in the file.
             
         """
-        names = [ self.header.INDEPENDENT_VARIABLE['NAME'] ]
-        for i in range(len(self.header.DEPENDENT_VARIABLE)):
-            names.append(self.header.DEPENDENT_VARIABLE[i]['NAME'])
+        if var_names == 'columns':
+            try:
+                names = self.header.COLUMN_VARIABLES
+            except AttributeError:
+                names = self.get_header_vars()
+        elif var_names == 'header':
+                names = self.get_header_vars()
+        elif type(var_names) == list:
+            if len(var_names) == int(self.header.TOTAL_NUM_VARIABLES):
+                names = var_names
+            else:
+                raise NameError("Number of variables in var_names list (%s) is "
+                                "inconsistent with the total number of variables (%s)" % 
+                                (len(var_names), self.header.TOTAL_NUM_VARIABLES) )
+        else:
+            raise AttributeError("Unknown var_names option: '%s'" % var_names)
         
         if case_sensitive in ['upper', False]:
             names = [name.upper() for name in names]
@@ -239,6 +265,13 @@ class Naspy(object):
         else:
             raise ValueError("case_sensitive option '%s' is undefined." % case_sensitive)
         
+        return names
+    
+    def get_header_vars(self):
+        """Gets variable names from the header description."""
+        names = [ self.header.INDEPENDENT_VARIABLE['NAME'] ]
+        for i in range(len(self.header.DEPENDENT_VARIABLE)):
+            names.append(self.header.DEPENDENT_VARIABLE[i]['NAME'])
         return names
     
     def dataframe_nans(self, df, missing_values='auto'):
@@ -297,6 +330,20 @@ class Naspy(object):
         
         return missingVals
     
+    def print_header(self):
+        """Displays the contents of the header to the screen."""
+        f = Fifo(self).open_file()
+        lines = []
+        i = 0
+        while i < self.header.HEADER_LINES:
+            lines.append(f.readline())
+            i += 1
+        f.close()
+        print ''
+        for line in lines:
+            print line.rstrip('\n')
+        return None
+    
     def __repr__(self):
         return ("%s Data File (FFI = %i)\n%s" % 
                 (self._file.data_format.upper(),
@@ -352,7 +399,7 @@ class Header(object):
         %s
         """ % (self.PI, self.ORGANIZATION, self.PI_CONTACT_INFO)
         return None
-
+    
     def data_description(self):
         pass
             
