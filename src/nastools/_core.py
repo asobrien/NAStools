@@ -73,12 +73,19 @@ class Naspy(object):
         
         return None
     
-    # TODO: add var_names option to make_numpy    
-    def make_numpy(self, masked=False, missing_values='auto'):
+       
+    def make_numpy(self, var_names='columns', masked=False, missing_values='auto'):
         """Generates a numpy.ndarray.
         
         PARAMETERS
         ----------
+        var_names : list or {'columns' or 'header'}, default 'columns'
+            Specifies how to determine variable names used in the numpy array; default 
+            behavior is to extract column names from the last line in the header. This is 
+            specified in ICARTT files but not always in NAS files. If this fails column 
+            names will be determined from variable descriptions in the header; this can 
+            be also be done by specifying 'header'. Alternately, a list of strings 
+            specifying variable names can be passed. Note that the case_sensitive options             are applied to this list.
         masked : bool, default False
             Species whether to return a masked array; must be True to convert missing 
             values to nans in the returned array.
@@ -102,10 +109,17 @@ class Naspy(object):
         arr = naspy.make_numpy(masked=True)
         
         """
+        # set delimiter
+        data_format = Fifo(self).get_filetype()[2]
+        if data_format == 'ict':
+            delimiter = ','
+        elif data_format == 'nas':
+            delimiter = None  # consecutive whitespaces is default
+        else:
+            raise AttributeError("unknown data format!")
+        
         # Get variable names
-        names = [ self.header.INDEPENDENT_VARIABLE['NAME'] ]
-        for i in range(len(self.header.DEPENDENT_VARIABLE)):
-            names.append(self.header.DEPENDENT_VARIABLE[i]['NAME'])
+        names = self.get_column_names(var_names)
         
         # Get a dictionary of missingVals on a per column basis
         if missing_values == 'auto':
@@ -113,17 +127,18 @@ class Naspy(object):
         else:
             missingVals = self.missing_values(missing_values)
         
+        
         # Read the lines into numpy object
         arr = np.genfromtxt(
                     self._fileAbsPath_,
-                    delimiter = ',',  # Comma seperated (ICT/AMES style?),
+                    delimiter = delimiter,  # Comma seperated (ICT/AMES style?),
                     names = names,
                     skip_header = self.header.HEADER_LINES,
                     missing_values = missingVals,
                     usemask=masked,
                     dtype = None,
                     case_sensitive = False,
-                    unpack=True
+                    # unpack=True
                     )
         # TODO: Future feature, numpy array with datetime64 support
         # KNOWN DEFECT: can't append datetime64 to an existing array using:
