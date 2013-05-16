@@ -13,6 +13,7 @@ import os
 import re
 import struct
 import warnings
+import md5
 
 #### SUB-MODULE DEPENDENCIES
 import ict
@@ -357,6 +358,27 @@ class Naspy(object):
         for line in lines:
             print line.rstrip('\n')
         return None
+    
+    def get_header_size(self):
+        """Returns the header size in bytes."""
+        f = Fifo(self).open_file()
+        lines = []
+        i = 0
+        while i < self.header.HEADER_LINES:
+            lines.append(f.readline())
+            i += 1
+        pos = f.tell()
+        f.close()
+        return pos
+        
+    def gen_data_md5(self):
+        f = Fifo(self).open_file()
+        f.seek(self.get_header_size())
+        data = f.read()
+        f.close()
+        return md5.md5(data).hexdigest()
+        
+        
     
     def __repr__(self):
         return ("%s Data File (FFI = %i)\n%s" % 
