@@ -26,7 +26,7 @@ Issues/bugs/feature requests/etc can be [reported here](https://github.com/asobr
 
 ### Installation ###
 
-Nastools are available from the cheeseshop:
+Nastools are available from the [cheeseshop](https://pypi.python.org/pypi/NAStools/):
 
     sudo pip install NAStools
     
@@ -38,6 +38,7 @@ Here are a few examples of how you can use nastools to help with your interactiv
 
 #### Header Information ####
 
+    ```python
     import nastools
     
     # Generate a Naspy object
@@ -68,12 +69,13 @@ Here are a few examples of how you can use nastools to help with your interactiv
     # See all the header info in a (relatively) nice format
     for key, val in h.header.__dict__.iteritems():
         print '%s: %s\n' % (key, val)
-    
+    ```
 Generating a Naspy object is enough to start doing analysis.
 
 
 #### Generate a Numpy Array ####
-
+    
+    ```python
     import nastools
     h = nastools.Naspy(~/Desktop/sampleFile.nas)
     
@@ -82,10 +84,11 @@ Generating a Naspy object is enough to start doing analysis.
     
     # Make a masked array with missing values masked
     arr = h.make_numpy(masked=True)
-    
+    ```
 
 #### Generate a DataFrame ####
-
+    
+    ```python
     import nastools
     h = nastools.Naspy(~/Desktop/sampleFile.nas)
     
@@ -96,7 +99,7 @@ Generating a Naspy object is enough to start doing analysis.
     df = h.make_DataFrame(datetime_asindex=False)
     # rename 'DATETIME' field to 'DT'
     df = df.rename(columns={'DATETIME':'DT'})
-    
+    ```
 
 ## VERSION HISTORY ##
 
