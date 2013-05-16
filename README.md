@@ -39,36 +39,36 @@ Here are a few examples of how you can use nastools to help with your interactiv
 #### Header Information ####
 
 ```python
-    import nastools
-    
-    # Generate a Naspy object
-    h = nastools.Naspy(~/Desktop/sampleFile.nas)
-    
-    # Get variable names
-    h.get_column_names()
-    
-    # Get instrument info
-    print h.header.INSTRUMENT_INFO
-    
-    # Get start time of file
-    startUtc = h.time.start_time()
-    print startUtc.isoformat()
-    
-    # Get end time of file
-    endUtc = h.time.end_time()
-    print endUtc.isoformat()
-    
-    # Total length of file
-    totalTime = endUtc - startUtc
-    print "**TOTAL FILE LENGTH**"
-    print "%s seconds" % totalTime.total_seconds()
-    
-    # See all the header keys
-    print D.header.__dict__.keys()
-    
-    # See all the header info in a (relatively) nice format
-    for key, val in h.header.__dict__.iteritems():
-        print '%s: %s\n' % (key, val)
+import nastools
+
+# Generate a Naspy object
+h = nastools.Naspy(~/Desktop/sampleFile.nas)
+
+# Get variable names
+h.get_column_names()
+
+# Get instrument info
+print h.header.INSTRUMENT_INFO
+
+# Get start time of file
+startUtc = h.time.start_time()
+print startUtc.isoformat()
+
+# Get end time of file
+endUtc = h.time.end_time()
+print endUtc.isoformat()
+
+# Total length of file
+totalTime = endUtc - startUtc
+print "**TOTAL FILE LENGTH**"
+print "%s seconds" % totalTime.total_seconds()
+
+# See all the header keys
+print D.header.__dict__.keys()
+
+# See all the header info in a (relatively) nice format
+for key, val in h.header.__dict__.iteritems():
+    print '%s: %s\n' % (key, val)
 ```
 Generating a Naspy object is enough to start doing analysis.
 
@@ -76,29 +76,29 @@ Generating a Naspy object is enough to start doing analysis.
 #### Generate a Numpy Array ####
     
 ```python
-    import nastools
-    h = nastools.Naspy(~/Desktop/sampleFile.nas)
-    
-    # Make a numpy array
-    arr = h.make_numpy()
-    
-    # Make a masked array with missing values masked
-    arr = h.make_numpy(masked=True)
+import nastools
+h = nastools.Naspy(~/Desktop/sampleFile.nas)
+
+# Make a numpy array
+arr = h.make_numpy()
+
+# Make a masked array with missing values masked
+arr = h.make_numpy(masked=True)
 ```
 
 #### Generate a DataFrame ####
     
 ```python
-    import nastools
-    h = nastools.Naspy(~/Desktop/sampleFile.nas)
-    
-    # Make a pandas.DataFrame
-    df = h.make_DataFrame()
-    
-    # Make a pandas.DataFrame with integer index (not datetime)
-    df = h.make_DataFrame(datetime_asindex=False)
-    # rename 'DATETIME' field to 'DT'
-    df = df.rename(columns={'DATETIME':'DT'})
+import nastools
+h = nastools.Naspy(~/Desktop/sampleFile.nas)
+
+# Make a pandas.DataFrame
+df = h.make_DataFrame()
+
+# Make a pandas.DataFrame with integer index (not datetime)
+df = h.make_DataFrame(datetime_asindex=False)
+# rename 'DATETIME' field to 'DT'
+df = df.rename(columns={'DATETIME':'DT'})
 ```
 
 ## VERSION HISTORY ##
