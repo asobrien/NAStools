@@ -10,10 +10,10 @@ Nastools provides a python package for dealing with common NASA file formats com
 Two common file formats are:
 
 * ICARRT File Format
-* NASA Ames File Format (not yet supported)
+* NASA Ames File Format
 
 
-Currently NASA Ames File Format is not yet supported. It is similar to the ICARTT File format, yet its implementation into this toolbox is still under development. 
+NASA Ames format is now supported! 
 
 Note that only FFI = 1001 type-files are supported at this point.
 
@@ -101,6 +101,7 @@ Generating a Naspy object is enough to start doing analysis.
 ## VERSION HISTORY ##
 
 * **0.1.0**: Initial release.
+* **0.1.1**: Support for NASA Ames files added; custom variable names can be passed to both pandas.DataFrame and numpy.array objects.
     
 
 
