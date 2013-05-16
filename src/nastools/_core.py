@@ -14,11 +14,10 @@ import re
 import struct
 import warnings
 
-#### DEPS?
+#### SUB-MODULE DEPENDENCIES
 import ict
-reload(ict)
 import nas
-reload(nas)
+
 
 
 ##### CLASS DEFINITIONS #####      
