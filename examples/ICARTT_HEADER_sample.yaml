@@ -1,0 +1,232 @@
+# ICARTT_HEADER--Completed_Sample.yaml (with comments!)
+
+# This is a YAML file containing information added to the ICARTT header
+# WARNING: No TABS allowed... everything here is done with soft-tabs (i.e., 
+#          space characters not tabs '\t').
+#          Use a text editor like notepad++ (windows) or textwrangler (mac),
+#           both are free (as in beer) and are highly recommended.
+#
+# More info on ICARTT Data Format*: 
+#   http://www-air.larc.nasa.gov/missions/etc/IcarttDataFormat.htm
+#   *Most of the comments used to describe the attributes in this file are taken
+#    from this guide.
+#
+# A brief introduction to YAML syntax used in this file can be found here:
+#   https://github.com/asobrien/pycartt/wiki/A-Very-Brief-Introduction-to-YAML
+# 
+# A Comment on Comments:  
+#   Comments can appear anywhere on a line and are specified by the `#` tag.
+#   Comments must be separated from an assignment by at least 1 space character.
+
+
+# IGNORE THE COMMENT BLOCK BELOW
+# TODO: Add the variables below to YAML file
+# Since the script generates the final file, some additional info may be needed 
+#  to generate
+# an appropriate file name... the
+# dataID: short description of measured parameter/species, instrument, or model 
+#  (e.g., O3; RH; VOC; PTRMS; MM5)
+# locationID: short description of site, station, platform, laboratory or inst.
+# YYYY: four-digit year
+# MM: two-digit month
+# DD: two-digit day
+# hh: optional two-digit hour
+# mm: optional two-digit minute
+# ss: optional two-digit second
+# R: revision number of data
+# L: optional launch number
+# V: optional volume number
+# comments: optional additional information
+# extension: ict file extension, always “ict”
+
+
+####################   YAML STREAM BEGINS BELOW THIS LINE  #####################
+
+
+---                                         # BEGIN YAML STREAM
+
+FFI: 1001                                   # File Format Index
+                                            #  see Sec. 2; http://bit.ly/KOXuZ9
+
+PI: 
+    LAST_NAME: Bird                         # Last name
+    FIRST_NAME: B.                          # First name or initial
+    ORGANIZATION: Sesame Institute          # Organization/affiliation of PI
+
+DATA_DESCRIPTION: Cookie Counter, ER-2      # Data source description
+                                            #  (e.g., instrument name, platform
+                                            #  name, model name, etc.)
+
+MISSION_NAME: AAOE                          # Usually the mission acronym
+                                            
+                                            # For data with only 1 file per day, 
+FILE_INFO:                                  #  both these values = 1                                
+    FILE_VOL_NO: 1                          # File volume number
+    NO_VOLUMES: 1                           # Number of file volumes 
+                                      
+TIMING_INFO:                                # Date Format: yyyy, mm, dd
+    START_TIME: 2012, 06, 05                # UTC date when data begins
+    REV_TIME: 2012, 06, 10                  # UTC date of data reduction or rev.
+    DATA_INTERVAL: 1                        # This value describes the time 
+                                            #  spacing (in seconds) between 
+                                            #  consecutive data records. It is 
+                                            #  the (constant) interval between 
+                                            #  values of the independent 
+                                            #  variable. For 1 Hz data the data 
+                                            #  interval value is 1 and for 10 Hz
+                                            #  data the value is 0.1. All 
+                                            #  intervals longer than 1 second 
+                                            #  must be reported as Start and 
+                                            #  Stop times, and the Data Interval 
+                                            #  value is set to 0. The Mid-point 
+                                            #  time is required when it is not    
+                                            #  at the average of Start and Stop 
+                                            #  times.
+                                            #  See Sec. 2.1.A; [bit.ly/MN4r77]
+
+INDEPENDENT_VARIABLE: Time_UTC              # Description or name of independent 
+                                            # variable.
+                                            #  (This is the name chosen for the 
+                                            #  start time. It always refers to 
+                                            #  the number of seconds UTC from 
+                                            #  the start of the day on which 
+                                            #  measurements began. It should be 
+                                            #  noted here that the independent 
+                                            #  variable should monotonically 
+                                            #  increase even when crossing over 
+                                            #  to a second day.
+
+# For each dependent variable in the file, add the attributes as list items.
+#  Delete or add items to the list, using `-` as required. 
+#  Align the attributes with the first attribute for an item (i.e., just use the
+#   formatting as shown below).
+DEPENDENT_VARIABLES:
+-   VARIABLE_NAME: COOKIE_ND                # Name of dependent variable 
+    SCALE_FACTOR: 1                         # 1 for most cases, except where 
+                                            # grossly inconvenient
+    MISSING_DATA: -999                      # Missing data indicators (This is 
+                                            #  -9999 (or -99999, etc.) for any 
+                                            #  missing data condition, except 
+                                            #  for the main time (independent) 
+                                            #  variable which is never missing)
+    UNITS: cookies cm^-3                    # If the variable is unitless, enter 
+                                            #  the keyword "none" for its units
+    VARIABLE_DESC:  >                       
+                    Cookie number density as measured by Cookie Monster during
+                    flight. This value is extrapolated to the entire cabin but
+                    is a discreet measurement of cookies/seat during flight.
+                    There is inherent uncertainty in the measurement as cookies
+                    are eaten in flight while being counted.
+# OPTIONAL long descriptive name (above), leave blank if not required.
+#  Long descriptions may be entered over multiple lines:
+#     `>` forces multi-lines comments onto a single line in output file
+#     `|` forces line breaks (formatting) to be respected.
+#  Align all subsequent lines with the formatting character to ensure no errors.
+
+# ADDITIONAL VARIABLES -- delete or repeat as required
+-   VARIABLE_NAME:  COOKIE_UNC              # Name of dependent variable 
+    SCALE_FACTOR: 1                         # 1 for most cases; [bit.ly/Mk1xZ1]
+    MISSING_DATA:  -999                     # Missing data indicators
+    UNITS:  cookies cm^-3                   # Enter "none" if unitless
+    VARIABLE_DESC: Uncertainty in count     # OPTIONAL, leave blank is unused
+
+    
+# Notes of problems or special circumstances unique to this file. An example 
+#  would be comments/problems associated with a particular flight            
+SPECIAL_COMMENTS:   >
+                    A significant number of cookies were eaten during the flight 
+                    so the uncertainty is larger than usual.
+
+
+# SUPPORTING INFORMATION: This is the place for investigators to more completely 
+#  describe the data and measurement parameters.
+NORMAL_COMMENTS: 
+    
+    # PI -- Name, affiliation, phone number, mailing address, email address 
+    #  and/or fax number.
+    PI_CONTACT_INFO:    |   
+                        Prof. Big Bird
+                        Dept. of Flight Research
+                        Sesame Institute
+                        123 Sesame St.
+                        New York, NY 10001
+                        bigbird@sesamest.com
+
+    # Data Manager -- Name, affiliation, phone number, mailing address, email 
+    #  address and/or fax number.
+    DM_CONTACT_INFO:    |
+                        Cookie Monster
+                        Senior Scientist
+                        Dept. of Baked Goods
+                        2 Evenprime Ln.
+                        NY, NY 10010
+                        (555) 555-2222
+                        cookiemonster@sesamest.com
+                     
+    # Instrument description, sampling technique and peculiarities, 
+    #  literature references, etc.     
+    INSTRUMENT_INFO:    >
+                        Cookie particle counter; discreet sample counter 
+                        utilizing a somewhat inefficient operator that manually 
+                        measures cookies as they appear in flight 
+
+    PLATFORM: NASA ER-2                     # Platform or site information.
+    LOCATION: Appledore Island, ME          # including lat/lon/elev if applic.
+    ASSOCIATED_DATA:                        # File names with associated data: 
+                                            # location data, aircraft params., 
+                                            # ship data, etc.
+    DATA_INFO:                              # Units and other information 
+                                            #  regarding data manipulation.
+    UNCERTAINTY:                            # Uncertainty information, whether a 
+                                            #  constant value or function, if 
+                                            #  the uncertainty is not given as 
+                                            #  separate variables.
+    ULOD_FLAG: -7777                        # -7777 (Upper LOD flag, 
+                                            #   always -7’s).
+    ULOD_VALUE: 10000                       # Upper LOD value (or function) 
+                                            #  corresponding to the -7777’s flag 
+                                            #  in the data records.
+    LLOD_FLAG: -8888                        # -8888 (Lower LOD flag, 
+                                            #  always -8’s).
+    LLOD_VALUE: 0.5                         #Lower LOD value (or function) 
+                                            #  corresponding to the -8888’s flag 
+                                            #  in the data records.
+    
+    #Study start & stop dates, web links, etc.
+    PROJECT_INFO: http://sesamestreet.com       
+    STIPULATIONS_ON_USE:    >
+                            This data probably isn't publishable 
+                            (for obvious reasons). 
+    OTHER_COMMENTS:                         #Any other relevant information.
+    REVISION: RA                            # R# See file names discussion.
+    
+    # Comments specific to this data revision. The revision numbers and the 
+    #  associated comments are cumulative in the data file. This is required in 
+    #  order to track the changes that have occurred to the data over time. 
+    #  Pre-pend the information to this section so that the latest revision 
+    #  number and comments always start this part of the header information. 
+    #  The latest revision data should correspond to the revision date on 
+    #  Line 7 of the main file header.
+    RA: First published data, subject to calibration uncertainties.
+    
+# Create your own special comment fields here, any blank fields are omitted. 
+#  There's no limit on what you can enter
+CUSTOM_COMMENTS: 
+    RESTRICTIONS_ON_USE: 
+    INSTRUMENT_OPERATOR: 
+    SHIPPING_ADDRESS:   | 
+                        Prof. Big Bird
+                        c/o Cookie Monster
+                        Dept. of Counting
+                        Shipping & Receiving Division
+                        123 Sesame St.
+                        New York, NY 10001 
+
+# should have a md5 of the data (only!) to ensure accuracy
+# if 'TRUE' generates during processing
+# if a value is entered, that is what is diplayed
+# else if empty, does not generate a data hash
+DATA_MD5_HASH:
+            
+   
+...                                             # END YAML STREAM

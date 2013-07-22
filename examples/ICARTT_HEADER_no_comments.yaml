@@ -1,0 +1,158 @@
+# ICARTT_HEADER--Completed_Sample.yaml (with comments!)
+
+# This is a YAML file containing information added to the ICARTT header
+# WARNING: No TABS allowed... everything here is done with soft-tabs (i.e., 
+#          space characters not tabs '\t').
+#          Use a text editor like notepad++ (windows) or textwrangler (mac),
+#           both are free (as in beer) and are highly recommended.
+#
+# More info on ICARTT Data Format*: 
+#   http://www-air.larc.nasa.gov/missions/etc/IcarttDataFormat.htm
+#   *Most of the comments used to describe the attributes in this file are taken
+#    from this guide.
+#
+# A brief introduction to YAML syntax used in this file can be found here:
+#   https://github.com/asobrien/pycartt/wiki/A-Very-Brief-Introduction-to-YAML
+# 
+# A Comment on Comments:  
+#   Comments can appear anywhere on a line and are specified by the `#` tag.
+#   Comments must be separated from an assignment by at least 1 space character.
+
+
+# IGNORE THE COMMENT BLOCK BELOW
+# TODO: Add the variables below to YAML file
+# Since the script generates the final file, some additional info may be needed 
+#  to generate
+# an appropriate file name... the
+# dataID: short description of measured parameter/species, instrument, or model 
+#  (e.g., O3; RH; VOC; PTRMS; MM5)
+# locationID: short description of site, station, platform, laboratory or inst.
+# YYYY: four-digit year
+# MM: two-digit month
+# DD: two-digit day
+# hh: optional two-digit hour
+# mm: optional two-digit minute
+# ss: optional two-digit second
+# R: revision number of data
+# L: optional launch number
+# V: optional volume number
+# comments: optional additional information
+# extension: ict file extension, always “ict”
+
+
+####################   YAML STREAM BEGINS BELOW THIS LINE  #####################
+
+
+---
+
+PI: 
+-   LAST_NAME: Bird
+    FIRST_NAME: B. 
+    MIDDLE_NAME:
+    
+-   LAST_NAME: Monster
+    FIRST_NAME: Cookie
+    
+-   LAST_NAME: Burgler
+    FIRST_NAME: Ham
+    MIDDLE_NAME: Bone
+
+ORGANIZATION: Sesame Institute
+
+DATA_DESCRIPTION: Cookie Counter, ER-2
+MISSION_NAME: AAOE
+ 
+# FILE_INFO:                               
+#     FILE_VOL_NO: 1
+#     NO_VOLUMES: 1
+                                      
+TIMING_INFO:
+    START_TIME: Auto
+    REV_TIME: Auto
+    DATA_INTERVAL: Auto
+
+INDEPENDENT_VARIABLE: Time_UTC
+
+# For each dependent variable in the file, add the attributes as list items.
+#  Delete or add items to the list, using `-` as required. 
+#  Align the attributes with the first attribute for an item (i.e., just use the
+#   formatting as shown below).
+DEPENDENT_VARIABLES:
+-   VARIABLE_NAME: COOKIE_ND 
+    SCALE_FACTOR: 1 
+    MISSING_DATA: -999
+    UNITS: cookies cm^-3 
+    VARIABLE_DESC:  >                       
+                    Cookie number density as measured by Cookie Monster during
+                    flight. This value is extrapolated to the entire cabin but
+                    is a discreet measurement of cookies/seat during flight.
+                    There is inherent uncertainty in the measurement as cookies
+                    are eaten in flight while being counted.
+
+-   VARIABLE_NAME:  COOKIE_UNC
+    SCALE_FACTOR: 1
+    MISSING_DATA:  -999
+    UNITS:  cookies cm^-3
+    VARIABLE_DESC: Uncertainty in count
+
+           
+SPECIAL_COMMENTS:   >
+                    A significant number of cookies were eaten during the flight 
+                    so the uncertainty is larger than usual.
+
+
+NORMAL_COMMENTS: 
+    PI_CONTACT_INFO:    |   
+                        Prof. Big Bird
+                        Dept. of Flight Research
+                        Sesame Institute
+                        123 Sesame St.
+                        New York, NY 10001
+                        bigbird@sesamest.com
+
+    DM_CONTACT_INFO:    |
+                        Cookie Monster
+                        Senior Scientist
+                        Dept. of Baked Goods
+                        2 Evenprime Ln.
+                        NY, NY 10010
+                        (555) 555-2222
+                        cookiemonster@sesamest.com
+                           
+    INSTRUMENT_INFO:    >
+                        Cookie particle counter; discreet sample counter 
+                        utilizing a somewhat inefficient operator that manually 
+                        measures cookies as they appear in flight 
+
+    PLATFORM: NASA ER-2
+    LOCATION: Appledore Island, ME
+    ASSOCIATED_DATA:
+    DATA_INFO:
+    UNCERTAINTY:
+    ULOD_FLAG: -7777
+    ULOD_VALUE: 10000
+    LLOD_FLAG: -8888
+    LLOD_VALUE: 0.5
+    PROJECT_INFO: http://sesamestreet.com       
+    STIPULATIONS_ON_USE:    >
+                            This data probably isn't publishable 
+                            (for obvious reasons). 
+    OTHER_COMMENTS:
+    REVISION: RA
+    RA: First published data, subject to calibration uncertainties.
+
+CUSTOM_COMMENTS:
+    RESTRICTIONS_ON_USE: None
+    INSTRUMENT_OPERATOR: 
+    SHIPPING_ADDRESS:   | 
+                        Prof. Big Bird
+                        c/o Cookie Monster
+                        Dept. of Counting
+                        Shipping & Receiving Division
+                        123 Sesame St.
+                        New York, NY 10001 
+
+DATA_MD5_HASH: Auto
+            
+   
+...  #EOF
