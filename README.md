@@ -28,9 +28,8 @@ Issues/bugs/feature requests/etc can be [reported here](https://github.com/asobr
 
 Nastools are available from the cheeseshop:
 
-    sudo pip install NAStools
-    
-Any other ways to install go here.
+    pip install NAStools
+
 
 ### Using Nastools ###
 
