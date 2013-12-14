@@ -14,6 +14,9 @@ import re
 import struct
 import warnings
 import md5
+import pytz
+
+utc = pytz.UTC
 
 #### SUB-MODULE DEPENDENCIES
 import ict
@@ -150,7 +153,8 @@ class Naspy(object):
         return arr
     
     def make_DataFrame(self, var_names='columns', case_sensitive='upper', 
-                       convert_missing=True, make_datetime=True, datetime_asindex=True,                          drop_datetime=True, missing_values='auto'):
+                       convert_missing=True, make_datetime=True, datetime_asindex=True, 
+                       drop_datetime=True, missing_values='auto', utc_localize=True):
         """Generates a pandas.DataFrame from a Naspy object.
         
         PARAMETERS
@@ -186,6 +190,10 @@ class Naspy(object):
         compression : {'auto', 'gzip', 'bz2', None}, default 'auto'
             For on-the-fly decompression of on-disk data; 'auto' will try and detect 
             filetype based on extension. Use other options to manually override 'auto'.
+        utc_localize : bool, default True
+            Whether or not to localize DataFrame.index as 'UTC'. If False, then no 
+            localization is applied. With localization, index is tz_aware allowing
+            for quick conversions between timezones.
         
         RETURNS
         -------
@@ -228,10 +236,15 @@ class Naspy(object):
         
         if make_datetime:
             DATETIME = 'DATETIME'
-            df[DATETIME] = ( np.timedelta64(df[df.columns[0]]*1E6) + 
-                             np.datetime64(self.header.START_UTC.isoformat()) )
+            start_date = self.header.START_UTC.replace(tzinfo=utc)
+            start_date = np.datetime64(start_date.isoformat())
+            df[DATETIME] = pandas.to_datetime( (np.array(df[df.columns[0]], dtype='timedelta64[s]') + 
+                                                start_date ), utc=True)
+
             if datetime_asindex:
                 df = df.set_index(DATETIME, drop=drop_datetime)
+                if utc_localize:
+                    df.index = df.index.tz_localize('UTC')
         
         return df
     
@@ -543,9 +556,9 @@ class Fifo(object):
             line = f.readline().strip()
             f.close()
             
-            if bool(re.search('(\d+),(\s)(\d+)*', line)):
+            if bool(re.search('(\d+),(\s)*(\d+)*', line)):  # may or may not have spaces
                 data_format = 'ict'
-            elif bool(re.search('(\d+)(\s)(\d+)*', line)):
+            elif bool(re.search('(\d+)(\s)+(\d+)*', line)):  # may have multiple spaces
                 data_format = 'nas'
             else:
                 data_format = None
