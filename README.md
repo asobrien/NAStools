@@ -104,6 +104,7 @@ df = df.rename(columns={'DATETIME':'DT'})
 
 * **0.1.0**: Initial release.
 * **0.1.1**: Support for NASA Ames files added; custom variable names can be passed to both pandas.DataFrame and numpy.array objects.
+* **0.1.2**: Added timezone localization to DataFrames; fixed bug preventing Datetime construction in DataFrames; fixed potential bug when automatically determining filetype.
     
 
 

@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='NAStools',
-      version='0.1.1',
+      version='0.1.2',
       description='Tools for working with ICARRT and NASA Ames data file formats',
       author="Anthony O'Brien",
       author_email='anthonyo@princeton.edu',
