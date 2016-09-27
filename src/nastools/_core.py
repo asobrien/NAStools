@@ -154,17 +154,20 @@ class Naspy(object):
     
     def make_DataFrame(self, var_names='columns', case_sensitive='upper', 
                        convert_missing=True, make_datetime=True, datetime_asindex=True, 
-                       drop_datetime=True, missing_values='auto', utc_localize=True):
+                       drop_datetime=True, datetime_column=0, missing_values='auto', 
+                       utc_localize=True):
         """Generates a pandas.DataFrame from a Naspy object.
         
         PARAMETERS
         ----------
         var_names : list or {'columns' or 'header'}, default 'columns'
-            Specifies how to determine variable names used in the DataFrame; default                  behavior is to extract column names from the last line in the header. This is 
+            Specifies how to determine variable names used in the DataFrame; default
+            behavior is to extract column names from the last line in the header. This is 
             specified in ICARTT files but not always in NAS files. If this fails column 
             names will be determined from variable descriptions in the header; this can 
             be also be done by specifying 'header'. Alternately, a list of strings 
-            specifying variable names can be passed. Note that the case_sensitive options             are applied to this list.
+            specifying variable names can be passed. Note that the case_sensitive options
+            are applied to this list.
         case_sensitive : string or bool, default 'upper'
             Formatting option of columns names; choices are 'upper' (default), 'lower', or
             'as-is' in addition to True or False. With no format specified, column names 
@@ -181,6 +184,10 @@ class Naspy(object):
             Whether or not to remove the datetime column from the DataFrame; note that 
             both make_datetime and datetime_asindex must be True for this option to to be 
             meaningful.
+        datetime_column : int or str, default 0
+            Specify column which should be used for datetime index by index or name. 
+            Defaults to the first column (index 0). note that make_datetime must 
+            be True for this option to be meaningful.
         missing_values : 'auto' or list, default 'auto'
             A list of strings specifying additional field names in the header file 
             (e.g. 'LLOD_FLAG') which indicate missing values. The default behavior is 
@@ -238,7 +245,9 @@ class Naspy(object):
             DATETIME = 'DATETIME'
             start_date = self.header.START_UTC.replace(tzinfo=utc)
             start_date = np.datetime64(start_date.isoformat())
-            df[DATETIME] = pandas.to_datetime( (np.array(df[df.columns[0]], dtype='timedelta64[s]') + 
+            if type(datetime_column) is str:
+                datetime_column = map(lambda x:x.lower(),df.columns).index(datetime_column.lower())
+            df[DATETIME] = pandas.to_datetime( (np.array(df[df.columns[datetime_column]], dtype='timedelta64[s]') + 
                                                 start_date ), utc=True)
 
             if datetime_asindex:
