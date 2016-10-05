@@ -247,7 +247,7 @@ class Naspy(object):
             start_date = np.datetime64(start_date.isoformat())
             if type(datetime_column) is str:
                 datetime_column = map(lambda x:x.lower(),df.columns).index(datetime_column.lower())
-            df[DATETIME] = pandas.to_datetime( (np.array(df[df.columns[datetime_column]], dtype='timedelta64[s]') + 
+            df[DATETIME] = pandas.to_datetime( (np.array(df[df.columns[datetime_column]]*1e9, dtype='timedelta64[ns]') + 
                                                 start_date ), utc=True)
 
             if datetime_asindex:
