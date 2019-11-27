@@ -13,7 +13,7 @@ Two common file formats are:
 * NASA Ames File Format
 
 
-NASA Ames format is now supported! 
+NASA Ames format is now supported!
 
 Note that only FFI = 1001 type-files are supported at this point.
 
@@ -73,7 +73,7 @@ Generating a Naspy object is enough to start doing analysis.
 
 
 #### Generate a Numpy Array ####
-    
+
 ```python
 import nastools
 h = nastools.Naspy(~/Desktop/sampleFile.nas)
@@ -86,7 +86,7 @@ arr = h.make_numpy(masked=True)
 ```
 
 #### Generate a DataFrame ####
-    
+
 ```python
 import nastools
 h = nastools.Naspy(~/Desktop/sampleFile.nas)
@@ -105,7 +105,8 @@ df = df.rename(columns={'DATETIME':'DT'})
 * **0.1.0**: Initial release.
 * **0.1.1**: Support for NASA Ames files added; custom variable names can be passed to both pandas.DataFrame and numpy.array objects.
 * **0.1.2**: Added timezone localization to DataFrames; fixed bug preventing Datetime construction in DataFrames; fixed potential bug when automatically determining filetype.
-    
+* **0.2.0**: Adds option to use any column as datetime field (@maahn, #4); removes unused
+    yamler.py source file (fixes #3); ownership info updated.
 
 
 
