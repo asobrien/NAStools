@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(name='NAStools',
-      version='0.2.0',
-      description='Tools for working with ICARRT and NASA Ames data file formats',
+      version='0.2.1',
+      description='Tools for working with ICARTT and NASA Ames data file formats',
       author="Anthony O'Brien",
       author_email='anthony@bearonis.com',
       url='https://github.com/asobrien/NAStools',
@@ -26,7 +26,7 @@ setup(name='NAStools',
 
       nastools works with:
 
-        - `ICARRT Data Format <http://www-air.larc.nasa.gov/missions/etc/IcarttDataFormat.htm>`_
+        - `ICARTT Data Format <http://www-air.larc.nasa.gov/missions/etc/IcarttDataFormat.htm>`_
         - `NASA Ames Format for Data Exchange <http://badc.nerc.ac.uk/help/formats/NASA-Ames/>`_
 
 

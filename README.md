@@ -9,13 +9,16 @@ Nastools provides a python package for dealing with common NASA file formats com
 
 Two common file formats are:
 
-* ICARRT File Format
-* NASA Ames File Format
-
+* [ICARTT File Format]
+* [NASA Ames File Format]
 
 NASA Ames format is now supported!
 
 Note that only FFI = 1001 type-files are supported at this point.
+
+[ICARTT File Format]: https://earthdata.nasa.gov/esdis/eso/standards-and-references/icartt-file-format
+[NASA Ames File Format]: https://espoarchive.nasa.gov/content/Ames_Format_Specification_v20
+
 
 ## Quick Start Guide ##
 
@@ -107,6 +110,7 @@ df = df.rename(columns={'DATETIME':'DT'})
 * **0.1.2**: Added timezone localization to DataFrames; fixed bug preventing Datetime construction in DataFrames; fixed potential bug when automatically determining filetype.
 * **0.2.0**: Adds option to use any column as datetime field (@maahn, #4); removes unused
     yamler.py source file (fixes #3); ownership info updated.
+* **0.2.1**: Fixes incorrect spelling throughout (ICARRT -> ICARTT, fixes #7).
 
 
 
